@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+version=1.0
+Type=Application
+#Exec=/usr/bin/env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/pulse /usr/local/pulse/pulseUi
+Exec=/usr/bin/env LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/pulse /usr/local/pulse/pulseUi
+Terminal=false
+Name=Pulse Secure
+Comment=Pulse Secure VPN client
+Icon=/usr/local/pulse/html/images/Pulse-Secure128x128.png

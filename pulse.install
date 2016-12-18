@@ -1,0 +1,7 @@
+post_install() {
+  /usr/pulse/ConfigurePulse.sh
+}
+
+post_upgrade() {
+  /usr/pulse/ConfigurePulse.sh
+}

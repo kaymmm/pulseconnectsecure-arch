@@ -1,0 +1,36 @@
+{
+  "name": "Pulse Secure",
+  "version": "5.2.1.8",
+  "manifest_version": 2,
+  "description": "Manage Pulse Secure connections",
+  "offline_enabled": true,
+  "icons": {
+    "128": "images/Pulse-Secure128x128.png"
+  },
+  "sockets": {
+    "tcp": { "connect" : "" }
+  },
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCMN716Qyu0l2EHNFqIJVqVysFcTR6urqhaGGqW4UK7slBaURz9+Sb1b4Ot5P1uQNE5c+CTU5Vu61wpqmSqMMxqHLWdPPMh8uRlyctsb2cxWwG6XoGSvpX29NsQVUFXd4v2tkJm3G9t+V0X8TYskrvWQmnyOW8OEIDvrBhUEfFxWQIDAQAB",
+  "oauth2": {
+    "client_id": "903965034255.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/drive"]
+  },
+  "storage": {
+      "managed_schema": "schema.json"
+  },
+  "permissions": [
+    "storage",
+    "vpnProvider",
+    "platformKeys",
+    {
+        "socket": [
+            "resolve-host"
+        ]
+    }
+  ]
+}

@@ -1,0 +1,224 @@
+--- PulseClient.sh	2016-12-17 15:42:59.221013465 -0800
++++ PulseClient.sh.new	2016-12-17 15:40:25.903679400 -0800
+@@ -17,7 +17,17 @@
+ PACKAGE_TYPE_DEB=2
+ SCRNAME=`basename $0`
+ 
+-SUPPORTED_OSTYPES_LIST=( CENTOS_6 CENTOS_7 UBUNTU_14 UBUNTU_15 UBUNTU_16 FEDORA RHEL_7 UNSUPPORTED)
++SUPPORTED_OSTYPES_LIST=( ARCH CENTOS_6 CENTOS_7 UBUNTU_14 UBUNTU_15 UBUNTU_16 FEDORA RHEL_7 UNSUPPORTED)
++#Arch
++ARCH_DEPENDENCIES=( glibc \
++                    nss \
++                    zlib \
++                    glib-networking \
++                    webkitgtk \
++                    xulrunner \
++                    libproxy \
++                    libxmu \
++  )
+ #RPM Based
+ CENTOS_6_DEPENDENCIES=( glibc \
+                         nss-softokn-freebl \
+@@ -152,6 +162,27 @@
+     declare -r ${name}=$i
+ done
+ 
++install_arch() {
++    i=$1
++    sudo -v > /dev/null 2>/dev/null
++    if [ $? -eq 0 ]; then 
++        echo "sudo password : "
++        sudo pacman -S $i 
++        if [ $? -ne 0 ]; then
++            echo "Failed to install dependencies.Please execute following command manually."
++            echo " sudo pacman -S $i"
++        fi
++    else 
++        echo "super user password : "
++        su -c " pacman -S $i"
++        if [ $? -ne 0 ]; then
++            echo "Failed to install dependencies.Please execute following command manually."
++            echo " pacman -S $i"
++        fi
++    fi
++
++}
++
+ install_deb() {
+     i=$1
+     sudo -v > /dev/null 2>/dev/null
+@@ -214,7 +245,12 @@
+ }
+ #determine the OS TYPE
+ determine_os_type() {
+-    if [ -f /etc/centos-release ]; then
++    if [ -f /etc/arch-release ]; then
++      OS_TYPE=${SUPPORTED_OSTYPES_LIST[$ARCH]}
++      OS_MAJOR_VERSION=$WEBKITGTK_3_SUPPORTED_VERSION
++      INSTALLDIR=/usr/pulse
++    elif [ -f /etc/centos-release ]; then
++        INSTALLDIR=/usr/local/pulse
+         OS_MAJOR_VERSION=$(cat /etc/centos-release | grep -o '.[0-9]'| head -1|sed -e 's/ //')
+         if [ $OS_MAJOR_VERSION = $WEBKITGTK_1_SUPPORTED_VERSION ]; then
+             OS_TYPE=${SUPPORTED_OSTYPES_LIST[$CENTOS_6]} 
+@@ -224,9 +260,11 @@
+             OS_TYPE=${SUPPORTED_OSTYPES_LIST[$UNSUPPORTED]}
+         fi
+     elif [ -f /etc/fedora-release ]; then 
++        INSTALLDIR=/usr/local/pulse
+         OS_MAJOR_VERSION=6 #Fedora uses webkitgtk-1.0
+         OS_TYPE=${SUPPORTED_OSTYPES_LIST[$FEDORA]}
+     elif [ -f /etc/redhat-release ]; then
++        INSTALLDIR=/usr/local/pulse
+         OS_MAJOR_VERSION=$(cat /etc/redhat-release | grep -o '.[0-9]'| head -1|sed -e 's/ //')
+         if [ $OS_MAJOR_VERSION = $WEBKITGTK_3_SUPPORTED_VERSION ]; then
+             OS_TYPE=${SUPPORTED_OSTYPES_LIST[$RHEL_7]} 
+@@ -234,8 +272,9 @@
+             OS_TYPE=${SUPPORTED_OSTYPES_LIST[$UNSUPPORTED]}
+         fi
+     else 
++        INSTALLDIR=/usr/local/pulse
+         OS_MAJOR_VERSION=6 #Every other flavour uses webkitgtk-1.0
+-        OSNAME=$(lsb_release -d | grep -o "Ubuntu")
++        OSNAME=$(lsb_release -d |grep -o "Ubuntu")
+         if [ "X$OSNAME" != "X" ]; then
+             UBUNTU_VER=$(lsb_release -d | grep -o '.[0-9]*\.'| head -1|sed -e 's/\s*//'|sed -e 's/\.//')
+             if [ $UBUNTU_VER = 14 ]; then
+@@ -249,6 +288,7 @@
+             fi
+         fi
+     fi
++echo "Please refer to $INSTALLDIR/README for instructions to launch the Pulse Client"
+ }
+ 
+ ubuntu14_install_webkit(){
+@@ -299,11 +339,14 @@
+     if [ $OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$UNSUPPORTED]} ]; then
+         return 
+     fi
++    isArchBased=0
+     isRpmBased=0
+     isDebBased=0
+     dependencyListName=${OS_TYPE}_DEPENDENCIES
+     dependencyListNameWithVersion=${OS_TYPE}_DEPENDENCIES_WITH_VERSION
+-    if [[ ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$CENTOS_6]}) || \
++    if [[ $OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$ARCH]} ]]; then
++      isArchBased=1
++    elif [[ ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$CENTOS_6]}) || \
+         ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$CENTOS_7]}) || \
+         ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$FEDORA]}) || \
+         ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$RHEL_7]})]]; then
+@@ -314,7 +357,30 @@
+         isDebBased=1
+     fi
+  
+-    if [ $isRpmBased = 1 ]; then
++    if [ $isArchBased = 1 ]; then
++        eval "depListArr=(\${${dependencyListName}[@]})"
++        # eval "depListArrWithVersion=(\${${dependencyListNameWithVersion}[@]})"
++        tam=${#depListArr[@]}
++        PKGREQ=""
++        for ((i=0; i < $tam; i++)); do
++            depPkgName=${depListArr[i]}
++            curPkgVar=`pacman -Q | grep -i $depPkgName`
++            if [ "X$curPkgVar" = "X" ]; then
++                echo "$depPkgName is missing in the machine" > $LOG
++                PKGREQ="$PKGREQ ${depListArr[i]}"
++            fi 
++        done
++        if [ "X" != "X$PKGREQ" ]; then
++            # Install respective packages based on the current installation
++            echo ""
++            echo "Please execute below commands to install missing dependent packages "
++            for i in `echo $PKGREQ`
++            do
++                echo "pacman -S $i"
++            done
++        fi
++        echo $readMeEchoMsg
++    elif [ $isRpmBased = 1 ]; then
+         eval "depListArr=(\${${dependencyListName}[@]})"
+         eval "depListArrWithVersion=(\${${dependencyListNameWithVersion}[@]})"
+         tam=${#depListArr[@]}
+@@ -401,6 +467,8 @@
+ 
+ function command_line_client_checks()
+ {
++    echo "Installed in $INSTALLDIR"
++    ARCH_DIST=0
+     RPM_DIST=0
+     DPKG_DIST=0
+     # If script is shipped as part of RPM, then 
+@@ -408,11 +476,50 @@
+     uname -a | grep -i "i386\|i486\|i586\|i686" >/dev/null
+     if [ $? -ne 0 ]; then 
+         if [ -e $INSTALLDIR/ConfigurePulse.sh ]; then 
++          if [ -f /etc/arch-release ]; then
++            ARCH_DIST=1
++          else
+             RPM_DIST=1
++          fi
+         else
+             DPKG_DIST=1
+         fi 
+-        if [ $RPM_DIST -eq 1 ]; then 
++        if [ $ARCH_DIST -eq 1 ]; then 
++            PKGREQ=""
++            glibc=`pacman -Q | grep -i glibc`
++            if [ "X$glibc" = "X" ]; then
++                echo "glibc is missing in the machine" > $LOG
++                PKGREQ="glibc"
++            fi  
++            nss=`pacman -Q | grep -i nss`
++            if [ "X$nss" = "X" ]; then 
++                echo "nss is missing in the machine" > $LOG
++                PKGREQ="$PKGREQ nss"
++            fi  
++            zlib=`pacman -Q | grep -i zlib`
++            if [ "X$zlib" = "X" ]; then 
++                echo "zlib is missing in the machine" > $LOG
++                PKGREQ="$PKGREQ zlib"
++            fi
++            if [ "X" != "X$PKGREQ" ]; then
++                sudo -v > /dev/null 2>/dev/null
++                if [ $? -eq 0 ]; then 
++                    echo "sudo password "
++                    sudo pacman -S $PKGREQ
++                    if [ $? -ne 0 ]; then
++                        echo "Failed to install dependencies.Please execute following command manually."
++                        echo " pacman -S $PKGREQ"
++                    fi
++                else 
++                    echo "super user password "
++                    su -c "pacman -S $PKGREQ"
++                    if [ $? -ne 0 ]; then
++                        echo "Failed to install dependencies.Please execute following command manually."
++                        echo " pacman -S $PKGREQ"
++                    fi
++                fi 
++            fi
++        elif [ $RPM_DIST -eq 1 ]; then 
+             PKGREQ=""
+             glibc=`rpm -qa | grep -i glibc | grep -i "i686\|i386"`
+             if [ "X$glibc" = "X" ]; then
+@@ -463,7 +570,7 @@
+                     echo "sudo password : "
+                     sudo apt-get install $PKGREQ 
+                     if [ $? -ne 0 ]; then
+-                        echo "Failed to install dependencies.Please execute following command manually."
++                        echo "BOBFailed to install dependencies.Please execute following command manually."
+                         echo " apt-get install $PKGREQ"
+                     fi
+                 else 
+@@ -515,9 +622,10 @@
+     $INSTALLDIR/$SVCNAME -C $SCRARGS
+ }
+ 
+-if [ $1 = 'install_dependency_packages' ] ; then
++if [[ "$1" = 'install_dependency_packages' ]] ; then
+     determine_os_type
+     check_and_install_missing_dependencies
+ else
++    determine_os_type
+     command_line_client_checks
+ fi
