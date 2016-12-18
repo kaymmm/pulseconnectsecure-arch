@@ -1,5 +1,5 @@
---- ConfigurePulse.sh	2016-08-17 03:41:33.000000000 -0700
-+++ ConfigurePulse.sh.new	2016-12-17 18:37:57.168689311 -0800
+--- rpm/ConfigurePulse.sh	2016-08-17 03:41:33.000000000 -0700
++++ rpm/ConfigurePulse.sh.new	2016-12-17 23:05:35.393015061 -0800
 @@ -1,8 +1,5 @@
  #!/bin/bash 
  INSTALLDIR=/usr/local/pulse
@@ -39,7 +39,7 @@
 +    if [ -f /etc/arch-release ]; then
 +      OS_TYPE=${SUPPORTED_OSTYPES_LIST[$ARCH]}
 +      OS_MAJOR_VERSION=$WEBKITGTK_1_SUPPORTED_VERSION
-+      INSTALLDIR=/usr/pulse
++      INSTALLDIR=/opt/pulse
 +    elif [ -f /etc/centos-release ]; then
 +        INSTALLDIR=/usr/local/pulse
          OS_MAJOR_VERSION=$(cat /etc/centos-release | grep -o '.[0-9]'| head -1|sed -e 's/ //')

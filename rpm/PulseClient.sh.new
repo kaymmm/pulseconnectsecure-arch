@@ -248,7 +248,7 @@ determine_os_type() {
     if [ -f /etc/arch-release ]; then
       OS_TYPE=${SUPPORTED_OSTYPES_LIST[$ARCH]}
       OS_MAJOR_VERSION=$WEBKITGTK_3_SUPPORTED_VERSION
-      INSTALLDIR=/usr/pulse
+      INSTALLDIR=/opt/pulse
     elif [ -f /etc/centos-release ]; then
         INSTALLDIR=/usr/local/pulse
         OS_MAJOR_VERSION=$(cat /etc/centos-release | grep -o '.[0-9]'| head -1|sed -e 's/ //')

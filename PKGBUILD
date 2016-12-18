@@ -12,8 +12,8 @@ source=("https://www.library.ucdavis.edu/ul/services/connect/clients/pulse-${pkg
 "ConfigurePulse.patch"
 "PulseClient.patch")
 md5sums=("cb5be8f78674cd413f6abee6efc7f909"
-"a4f2027bdaa2ab0bcf7ecd6991003d6c"
-"c8a2d63abeacd10e90922a2ce4c66a04")
+"1f5d97fdd18947c5cac7f8dc9c4624c7"
+"290f7fc5b020827381754c61515fe549")
 install=pulse.install
 
 prepare() {
@@ -22,5 +22,5 @@ prepare() {
 }
 
 package() {
-  cp -r "${srcdir}/usr/local/" "${pkgdir}/usr/"
+  cp -r "${srcdir}/usr/local/" "${pkgdir}/opt/"
 }

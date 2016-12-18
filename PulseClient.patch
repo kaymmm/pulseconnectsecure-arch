@@ -1,5 +1,5 @@
---- PulseClient.sh	2016-12-17 15:42:59.221013465 -0800
-+++ PulseClient.sh.new	2016-12-17 15:40:25.903679400 -0800
+--- rpm/PulseClient.sh	2016-12-17 15:42:59.221013465 -0800
++++ rpm/PulseClient.sh.new	2016-12-17 23:06:06.226615699 -0800
 @@ -17,7 +17,17 @@
  PACKAGE_TYPE_DEB=2
  SCRNAME=`basename $0`
@@ -55,7 +55,7 @@
 +    if [ -f /etc/arch-release ]; then
 +      OS_TYPE=${SUPPORTED_OSTYPES_LIST[$ARCH]}
 +      OS_MAJOR_VERSION=$WEBKITGTK_3_SUPPORTED_VERSION
-+      INSTALLDIR=/usr/pulse
++      INSTALLDIR=/opt/pulse
 +    elif [ -f /etc/centos-release ]; then
 +        INSTALLDIR=/usr/local/pulse
          OS_MAJOR_VERSION=$(cat /etc/centos-release | grep -o '.[0-9]'| head -1|sed -e 's/ //')
