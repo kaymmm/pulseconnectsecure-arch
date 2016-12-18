@@ -1,4 +1,4 @@
-pkgname=pulse
+pkgname=pulseconnect
 pkgver="8.2R5"
 pkgrel=1
 pkgdesc="Pulse Connect Secure VPN client"
@@ -8,7 +8,7 @@ license=("unknown")
 depends=("glibc" "webkitgtk" "zlib" "nss" "glib-networking" "xulrunner" "libproxy" "libxmu" "lib32-libsoup" "lib32-gtk3")
 makedepends=()
 options=("emptydirs")
-source=("https://www.library.ucdavis.edu/ul/services/connect/clients/${pkgname}-${pkgver}.i386.rpm"
+source=("https://www.library.ucdavis.edu/ul/services/connect/clients/pulse-${pkgver}.i386.rpm"
 "ConfigurePulse.patch"
 "PulseClient.patch")
 md5sums=("cb5be8f78674cd413f6abee6efc7f909"
