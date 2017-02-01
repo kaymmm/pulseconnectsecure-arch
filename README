@@ -15,7 +15,7 @@ git clone this repository or download the source, then cd into the source direct
 To run the client (from the official documentation): 
 
 ```sh
-/usr/pulse/PulseClient.sh -h <hostname/IP> -u <VPN username> [-p <VPN password>] [-r <realm>] [-U <PCS signinurl>] [-y <proxy IP/hostname>] [-z <proxy port>]
+/opt/pulse/PulseClient.sh -h <hostname/IP> -u <VPN username> [-p <VPN password>] [-r <realm>] [-U <PCS signinurl>] [-y <proxy IP/hostname>] [-z <proxy port>]
 ```
 __Note:___ The client does not provide feedback when a connection has been successfully established. It will keep running in the background, even if you hit Ctl-C.
 
@@ -28,7 +28,7 @@ If you don't include the realm, it will default to Users.
 To kill the VPN client:
 
 ```sh
-/usr/pulse/PulseClient.sh -K
+/opt/pulse/PulseClient.sh -K
 ```
 
 ## Package Info
