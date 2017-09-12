@@ -1,55 +1,43 @@
---- rpm/ConfigurePulse.sh	2016-08-17 03:41:33.000000000 -0700
-+++ rpm/ConfigurePulse.sh.new	2016-12-17 23:05:35.393015061 -0800
-@@ -1,8 +1,5 @@
- #!/bin/bash 
- INSTALLDIR=/usr/local/pulse
+--- rpm/usr/local/pulse/ConfigurePulse.sh	2017-03-29 09:47:24.000000000 -0700
++++ ConfigurePulse.sh	2017-09-12 13:11:46.245873182 -0700
+@@ -1,8 +1,4 @@
+ #!/bin/bash
+-INSTALLDIR=/usr/local/pulse
 -LOG=$INSTALLDIR/postinstall.log
 -# Redirect the stdout/stderr into postinstall log
 -echo "Starting Post Install Script " > $LOG
  # no-same-owner is required to get root permission
  WEBKITGTK_1_SUPPORTED_VERSION=6
  WEBKITGTK_3_SUPPORTED_VERSION=7
-@@ -10,10 +7,19 @@
- PACKAGE_TYPE_RPM=1
- PACKAGE_TYPE_DEB=2
- SCRNAME=`basename $0`
--readMeEchoMsg="Please refer /usr/local/pulse/README for instructions to launch the Pulse Client"
+@@ -13,7 +9,18 @@
+ readMeEchoMsg="Please refer /usr/local/pulse/README for instructions to launch the Pulse Client"
  
  
 -SUPPORTED_OSTYPES_LIST=( CENTOS_6 CENTOS_7 UBUNTU_14 UBUNTU_15 UBUNTU_16 FEDORA RHEL_7 UNSUPPORTED)
 +SUPPORTED_OSTYPES_LIST=( ARCH CENTOS_6 CENTOS_7 UBUNTU_14 UBUNTU_15 UBUNTU_16 FEDORA RHEL_7 UNSUPPORTED)
-+#Arch
++
++#Arch Linux
 +ARCH_DEPENDENCIES=( glibc \
 +                    nss \
 +                    zlib \
 +                    glib-networking \
-+                    webkitgtk \
-+                    xulrunner \
 +                    libproxy \
 +                    libxmu \
-+  )
++                    lib32-zlib \
++                    lib32-libstdc++5)
++
  #RPM Based
  CENTOS_6_DEPENDENCIES=( glibc \
                          nss-softokn-freebl \
-@@ -151,7 +157,12 @@
+@@ -147,6 +154,7 @@
  
  #determine the OS TYPE
  determine_os_type() {
--    if [ -f /etc/centos-release ]; then
-+    if [ -f /etc/arch-release ]; then
-+      OS_TYPE=${SUPPORTED_OSTYPES_LIST[$ARCH]}
-+      OS_MAJOR_VERSION=$WEBKITGTK_1_SUPPORTED_VERSION
-+      INSTALLDIR=/opt/pulse
-+    elif [ -f /etc/centos-release ]; then
-+        INSTALLDIR=/usr/local/pulse
++    INSTALLDIR=/usr/local/pulse
+     if [ -f /etc/centos-release ]; then
          OS_MAJOR_VERSION=$(cat /etc/centos-release | grep -o '.[0-9]'| head -1|sed -e 's/ //')
          if [ $OS_MAJOR_VERSION = $WEBKITGTK_1_SUPPORTED_VERSION ]; then
-             OS_TYPE=${SUPPORTED_OSTYPES_LIST[$CENTOS_6]} 
-@@ -161,9 +172,11 @@
-             OS_TYPE=${SUPPORTED_OSTYPES_LIST[$UNSUPPORTED]}
-         fi
-     elif [ -f /etc/fedora-release ]; then 
-+        INSTALLDIR=/usr/local/pulse
+@@ -160,13 +168,19 @@
          OS_MAJOR_VERSION=6 #Fedora uses webkitgtk-1.0
          OS_TYPE=${SUPPORTED_OSTYPES_LIST[$FEDORA]}
      elif [ -f /etc/redhat-release ]; then
@@ -57,41 +45,37 @@
          OS_MAJOR_VERSION=$(cat /etc/redhat-release | grep -o '.[0-9]'| head -1|sed -e 's/ //')
          if [ $OS_MAJOR_VERSION = $WEBKITGTK_3_SUPPORTED_VERSION ]; then
              OS_TYPE=${SUPPORTED_OSTYPES_LIST[$RHEL_7]} 
-@@ -171,6 +184,7 @@
+         else
              OS_TYPE=${SUPPORTED_OSTYPES_LIST[$UNSUPPORTED]}
          fi
++    elif [ -f /etc/arch-release ]; then
++        INSTALLDIR=/opt/pulse
++        OS_TYPE=${SUPPORTED_OSTYPES_LIST[$ARCH]}
++        OS_MAJOR_VERSION=0
      else 
 +        INSTALLDIR=/usr/local/pulse
          OS_MAJOR_VERSION=6 #Every other flavour uses webkitgtk-1.0
          OSNAME=$(lsb_release -d |grep -o "Ubuntu")
          if [ "X$OSNAME" != "X" ]; then
-@@ -186,23 +200,32 @@
+@@ -182,13 +196,16 @@
              fi
          fi
      fi
-+  LOG=$INSTALLDIR/postinstall.log
-+  # Redirect the stdout/stderr into postinstall log
-+  echo "Starting Post Install Script " > $LOG
-+  readMeEchoMsg="Please refer to $INSTALLDIR/README for instructions to launch the Pulse Client"
++    LOG=$INSTALLDIR/postinstall.log
++    # Redirect the stdout/stderr into postinstall log
++    echo "Starting Post Install Script " > $LOG
  }
  
  install_binaries() {
--    if [ $OS_MAJOR_VERSION = $WEBKITGTK_3_SUPPORTED_VERSION ] ; then
--        mv $INSTALLDIR/pulseUi_centos_7 $INSTALLDIR/pulseUi
--        mv $INSTALLDIR/libpulseui.so_centos_7 $INSTALLDIR/libpulseui.so
+     if [ $OS_MAJOR_VERSION = $WEBKITGTK_3_SUPPORTED_VERSION ] ; then
+         mv $INSTALLDIR/pulseUi_centos_7 $INSTALLDIR/pulseUi
+         mv $INSTALLDIR/libpulseui.so_centos_7 $INSTALLDIR/libpulseui.so
 -    else
--        mv $INSTALLDIR/pulseUi_centos_6 $INSTALLDIR/pulseUi
--        mv $INSTALLDIR/libpulseui.so_centos_6 $INSTALLDIR/libpulseui.so
-+    if [ ! $OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$ARCH]} ]; then
-+        if [ $OS_MAJOR_VERSION = $WEBKITGTK_3_SUPPORTED_VERSION ] ; then
-+            mv $INSTALLDIR/pulseUi_centos_7 $INSTALLDIR/pulseUi
-+            mv $INSTALLDIR/libpulseui.so_centos_7 $INSTALLDIR/libpulseui.so
-+        else
-+            mv $INSTALLDIR/pulseUi_centos_6 $INSTALLDIR/pulseUi
-+            mv $INSTALLDIR/libpulseui.so_centos_6 $INSTALLDIR/libpulseui.so
-+        fi
++    elif [ $OS_MAJOR_VERSION = $WEBKITGTK_1_SUPPORTED_VERSION ] ; then
+         mv $INSTALLDIR/pulseUi_centos_6 $INSTALLDIR/pulseUi
+         mv $INSTALLDIR/libpulseui.so_centos_6 $INSTALLDIR/libpulseui.so
      fi
- }
+@@ -196,13 +213,14 @@
  
  
  handle_common_installation() {
@@ -101,13 +85,16 @@
 +    echo "Unpacking binaries to $INSTALLDIR"
 +    tar --no-same-owner -xzf $INSTALLDIR/pulse.tgz -C $INSTALLDIR >/dev/null
 +    chmod +rws $INSTALLDIR/pulsesvc
-+    if [ ! $OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$ARCH]} ]; then
-+      mv $INSTALLDIR/pulseUi.desktop /usr/share/applications
-+    fi
++    mv $INSTALLDIR/pulseUi.desktop /usr/share/applications
+ 	# only for rpm based platforms. check for script name to check if current package is rpm
+ 	if [ "X$SCRNAME" = "XConfigurePulse.sh" ]; then
+ 		if [ $OS_TYPE != ${SUPPORTED_OSTYPES_LIST[$CENTOS_6]} ]; then
+-			rm /usr/local/pulse/libsoup-2.4.so.1
++			rm $INSTALLDIR/libsoup-2.4.so.1
+ 		fi 
+ 	fi
  }
- 
- handle_uninstallation() {
-@@ -214,8 +237,8 @@
+@@ -216,8 +234,8 @@
          if [ "X$UNINSTALL" != "X" ]; then 
              killall pulseUi 2&>/dev/null
              killall pulsesvc 2&>/dev/null
@@ -118,7 +105,7 @@
              rm -f /usr/share/applications/pulseUi.desktop
              read -p "Do you want to clean up the connection store? [Yy/Nn] " -n 1 -r
              echo    # (optional) move to a new line
-@@ -225,9 +248,9 @@
+@@ -227,9 +245,9 @@
              fi
              exit 
          fi 
@@ -131,7 +118,7 @@
      fi
  }
  
-@@ -235,11 +258,14 @@
+@@ -237,6 +255,7 @@
      if [ $OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$UNSUPPORTED]} ]; then
          return 
      fi
@@ -139,20 +126,43 @@
      isRpmBased=0
      isDebBased=0
      dependencyListName=${OS_TYPE}_DEPENDENCIES
-     dependencyListNameWithVersion=${OS_TYPE}_DEPENDENCIES_WITH_VERSION
--    if [[ ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$CENTOS_6]}) || \
-+    if [[ $OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$ARCH]} ]]; then
-+      isArchBased=1
-+    elif [[ ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$CENTOS_6]}) || \
+@@ -244,12 +263,14 @@
+     if [[ ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$CENTOS_6]}) || \
          ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$CENTOS_7]}) || \
          ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$FEDORA]}) || \
-         ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$RHEL_7]})]]; then
-@@ -250,7 +276,30 @@
+-        ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$RHEL_7]})]]; then
++        ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$RHEL_7]}) ]]; then
+         isRpmBased=1
+     elif [[ ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$UBUNTU_14]}) || \
+         ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$UBUNTU_15]}) || \
+-        ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$UBUNTU_16]})]]; then
++        ($OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$UBUNTU_16]}) ]]; then
          isDebBased=1
++    elif [[ $OS_TYPE = ${SUPPORTED_OSTYPES_LIST[$ARCH]} ]]; then
++      isArchBased=1
      fi
   
--    if [ $isRpmBased = 1 ]; then
-+    if [ $isArchBased = 1 ]; then
+     if [ $isRpmBased = 1 ]; then
+@@ -299,7 +320,7 @@
+             echo ""
+             echo "OR" 
+             echo "You can install the missing dependency packages by running the below script "
+-            echo "  /usr/local/pulse/PulseClient.sh install_dependency_packages"
++            echo "  $INSTALLDIR/PulseClient.sh install_dependency_packages"
+             echo ""
+         fi
+         echo $readMeEchoMsg
+@@ -329,17 +350,40 @@
+             echo ""
+             echo "OR" 
+             echo "You can install the missing dependency packages by running the below script "
+-            echo "  /usr/local/pulse/PulseClient.sh install_dependency_packages"
++            echo "  $INSTALLDIR/PulseClient.sh install_dependency_packages"
+             echo ""
+         fi 
+         echo $readMeEchoMsg
+         echo ""
++    elif [ $isArchBased = 1 ]; then
 +        eval "depListArr=(\${${dependencyListName}[@]})"
 +        # eval "depListArrWithVersion=(\${${dependencyListNameWithVersion}[@]})"
 +        tam=${#depListArr[@]}
@@ -171,29 +181,17 @@
 +            echo "Please execute below commands to install missing dependent packages "
 +            for i in `echo $PKGREQ`
 +            do
-+                echo "pacman -S $i"
++                echo "sudo pacman -S $i"
 +            done
 +        fi
 +        echo $readMeEchoMsg
-+    elif [ $isRpmBased = 1 ]; then
-         eval "depListArr=(\${${dependencyListName}[@]})"
-         eval "depListArrWithVersion=(\${${dependencyListNameWithVersion}[@]})"
-         tam=${#depListArr[@]}
-@@ -297,7 +346,7 @@
-             echo ""
-             echo "OR" 
-             echo "You can install the missing dependency packages by running the below script "
--            echo "  /usr/local/pulse/PulseClient.sh install_dependency_packages"
-+            echo "  $INSTALLDIR/PulseClient.sh install_dependency_packages"
-             echo ""
-         fi
-         echo $readMeEchoMsg
-@@ -327,7 +376,7 @@
-             echo ""
-             echo "OR" 
-             echo "You can install the missing dependency packages by running the below script "
--            echo "  /usr/local/pulse/PulseClient.sh install_dependency_packages"
-+            echo "  $INSTALLDIR/PulseClient.sh install_dependency_packages"
-             echo ""
-         fi 
-         echo $readMeEchoMsg
+     fi
+ }
+ 
+ #Main
+ determine_os_type
+ handle_common_installation
+-install_binaries
++#install_binaries
+ handle_uninstallation
+ check_missing_dependencies

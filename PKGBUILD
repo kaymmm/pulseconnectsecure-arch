@@ -1,19 +1,19 @@
 pkgname=pulseconnect
-pkgver="8.2R5"
+pkgver="5.2R8"
 pkgrel=1
 pkgdesc="Pulse Connect Secure VPN client"
 arch=("i686" "x86_64")
-url="https://kb.pulsesecure.net/articles/Pulse_Secure_Article/KB40126"
+url="https://www.library.ucdavis.edu/service/connect-from-off-campus/vpn-questions-known-issues/"
 license=("unknown")
-depends=("glibc" "webkitgtk" "zlib" "nss" "glib-networking" "xulrunner" "libproxy" "libxmu" "lib32-libsoup" "lib32-gtk3")
+depends=("glibc" "zlib" "nss" "glib-networking" "xulrunner" "libproxy" "libxmu" )
 makedepends=()
 options=("emptydirs")
-source=("https://www.library.ucdavis.edu/ul/services/connect/clients/pulse-${pkgver}.i386.rpm"
+source=("https://www.library.ucdavis.edu/wp-content/uploads/vpn-clients/pulse-${pkgver}.i386.rpm"
 "ConfigurePulse.patch"
 "PulseClient.patch")
-md5sums=("cb5be8f78674cd413f6abee6efc7f909"
-"1f5d97fdd18947c5cac7f8dc9c4624c7"
-"290f7fc5b020827381754c61515fe549")
+md5sums=("8a0407e4c2f266a214471bc1c8b5edec"
+"cf293fb001d8dfbb41ba30c5b33edfd3"
+"2ba22678d7d5afe9e35e269dc836eef1")
 install=pulse.install
 
 prepare() {
