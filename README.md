@@ -1,3 +1,12 @@
+# Note:
+
+Thanks to @ids1024, this should no longer be necessary for most users trying to connect to a pulseconnect vpn server. You should be able to use openconnect (pacman -S openconnect), though your mileage may vary based on the configuration of the server.
+
+e.g.: 
+  `sudo openconnect --juniper vpn.library.ucdavis.edu`
+
+-----
+
 # Pulse Connect Secure Client
 
 ## Description
